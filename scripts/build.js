@@ -53,13 +53,24 @@ async function buildAll(targets) {
   await runParallel(require('os').cpus().length, targets, build)
 }
 
+/**
+ * 
+ * @param {*} maxConcurrency 最大并发数
+ * @param {*} source 传入的编译目标
+ * @param {*} iteratorFn 单个变异函数
+ * @returns 
+ */
 async function runParallel(maxConcurrency, source, iteratorFn) {
   const ret = []
-  const executing = []
+  const executing = [] // 记录当前正在执行的任务
   for (const item of source) {
     const p = Promise.resolve().then(() => iteratorFn(item, source))
     ret.push(p)
 
+    /**
+     * 在遍历的过程中，如果发现正在执行的异步任务executing的长度大于最大并发数maxConcurrency，则停止循环后续的异步任务，等待当前某个异步任务执行完毕。
+     * 然后，当某个异步任务优先执行完毕后，就会被从executing中删除，这样就又可以继续循环执行后续的异步任务了。
+     */
     if (maxConcurrency <= source.length) {
       const e = p.then(() => executing.splice(executing.indexOf(e), 1))
       executing.push(e)
