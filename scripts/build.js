@@ -87,6 +87,7 @@ async function build(target) {
   const pkg = require(`${pkgDir}/package.json`)
 
   // if this is a full build (no specific targets), ignore private packages
+  // 只编译公共包
   if ((isRelease || !targets.length) && pkg.private) {
     return
   }
@@ -99,6 +100,7 @@ async function build(target) {
   const env =
     (pkg.buildOptions && pkg.buildOptions.env) ||
     (devOnly ? 'development' : 'production')
+  // 执行rollup命令, 运行rulloup打包工具
   await execa(
     'rollup',
     [

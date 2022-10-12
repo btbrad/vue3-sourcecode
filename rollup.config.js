@@ -53,7 +53,7 @@ const outputConfigs = {
 
 const defaultFormats = ['esm-bundler', 'cjs']
 const inlineFormats = process.env.FORMATS && process.env.FORMATS.split(',')
-const packageFormats = inlineFormats || packageOptions.formats || defaultFormats
+const packageFormats = inlineFormats || packageOptions.formats || defaultFormats // 优先级：命令行>package.json>默认
 const packageConfigs = process.env.PROD_ONLY
   ? []
   : packageFormats.map(format => createConfig(format, outputConfigs[format]))
@@ -102,6 +102,7 @@ function createConfig(format, output, plugins = []) {
     pkg.types && process.env.TYPES != null && !hasTSChecked
 
   const tsPlugin = ts({
+    // 是否开启语法检查
     check: process.env.NODE_ENV === 'production' && !hasTSChecked,
     tsconfig: path.resolve(__dirname, 'tsconfig.json'),
     cacheRoot: path.resolve(__dirname, 'node_modules/.rts2_cache'),
@@ -142,6 +143,7 @@ function createConfig(format, output, plugins = []) {
   } else {
     // Node / esm-bundler builds.
     // externalize all direct deps unless it's the compat build.
+    // esm=bundler需配合打包工具使用，把所有依赖都作为external
     external = [
       ...Object.keys(pkg.dependencies || {}),
       ...Object.keys(pkg.peerDependencies || {}),
