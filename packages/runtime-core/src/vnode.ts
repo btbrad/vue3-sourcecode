@@ -499,6 +499,7 @@ function _createVNode(
   dynamicProps: string[] | null = null,
   isBlockNode = false
 ): VNode {
+  // 判断type是否为空
   if (!type || type === NULL_DYNAMIC_COMPONENT) {
     if (__DEV__ && !type) {
       warn(`Invalid vnode type when creating vnode: ${type}.`)
@@ -506,6 +507,7 @@ function _createVNode(
     type = Comment
   }
 
+  // 判断type是不是一个vnode节点
   if (isVNode(type)) {
     // createVNode receiving an existing vnode. This happens in cases like
     // <component :is="vnode"/>
@@ -525,6 +527,7 @@ function _createVNode(
     return cloned
   }
 
+  // 判断type是不是一个class类型组件
   // class component normalization.
   if (isClassComponent(type)) {
     type = type.__vccOpts
@@ -535,6 +538,7 @@ function _createVNode(
     type = convertLegacyComponent(type, currentRenderingInstance)
   }
 
+  // class和style标准化
   // class & style normalization.
   if (props) {
     // for reactive or proxy objects, we need to clone it to enable mutation.
