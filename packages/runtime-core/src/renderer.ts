@@ -350,6 +350,19 @@ function baseCreateRenderer(
 
   // Note: functions inside this closure should use `const xxx = () => {}`
   // style in order to prevent being inlined by minifiers.
+  /**
+   *
+   * @param n1 旧的vnode
+   * @param n2 新的vnode
+   * @param container DOM容器
+   * @param anchor 挂载参考的锚点
+   * @param parentComponent
+   * @param parentSuspense
+   * @param isSVG
+   * @param slotScopeIds
+   * @param optimized
+   * @returns
+   */
   const patch: PatchFn = (
     n1,
     n2,
@@ -582,6 +595,7 @@ function baseCreateRenderer(
   ) => {
     isSVG = isSVG || (n2.type as string) === 'svg'
     if (n1 == null) {
+      // 旧节点不存在，则挂载新节点
       mountElement(
         n2,
         container,
@@ -593,6 +607,7 @@ function baseCreateRenderer(
         optimized
       )
     } else {
+      // 更新元素节点
       patchElement(
         n1,
         n2,
@@ -618,7 +633,7 @@ function baseCreateRenderer(
     let el: RendererElement
     let vnodeHook: VNodeHook | undefined | null
     const { type, props, shapeFlag, transition, dirs } = vnode
-
+    // 创建DOM元素节点
     el = vnode.el = hostCreateElement(
       vnode.type as string,
       isSVG,
@@ -704,6 +719,7 @@ function baseCreateRenderer(
     if (needCallTransitionHooks) {
       transition!.beforeEnter(el)
     }
+    // 把创建的DOM元素节点挂载到container上
     hostInsert(el, container, anchor)
     if (
       (vnodeHook = props && props.onVnodeMounted) ||
@@ -771,6 +787,7 @@ function baseCreateRenderer(
       const child = (children[i] = optimized
         ? cloneIfMounted(children[i] as VNode)
         : normalizeVNode(children[i]))
+      // 递归patch挂载child
       patch(
         null,
         child,
