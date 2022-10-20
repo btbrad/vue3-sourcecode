@@ -30,7 +30,7 @@ declare module '@vue/reactivity' {
     runtimeDOMBailTypes: Node | Window
   }
 }
-
+// 与平台渲染相关的一些配置，比如更新属性，操作DOM函数等
 const rendererOptions = /*#__PURE__*/ extend({ patchProp }, nodeOps)
 
 // lazy create the renderer - this makes core renderer logic tree-shakable
@@ -39,6 +39,7 @@ let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer
 
 let enabledHydration = false
 
+// 延时创建渲染器，当用户只依赖响应式包的时候，可以通过tree-shaking移除与核心渲染逻辑相关的代码
 function ensureRenderer() {
   return (
     renderer ||
@@ -64,6 +65,7 @@ export const hydrate = ((...args) => {
 }) as RootHydrateFunction
 
 export const createApp = ((...args) => {
+  // 创建app对象
   const app = ensureRenderer().createApp(...args)
 
   if (__DEV__) {
@@ -72,11 +74,14 @@ export const createApp = ((...args) => {
   }
 
   const { mount } = app
+  // 重写mount函数
   app.mount = (containerOrSelector: Element | ShadowRoot | string): any => {
+    // 标准化容器
     const container = normalizeContainer(containerOrSelector)
     if (!container) return
 
     const component = app._component
+    // 如果组件对象没有定义render函数和template模板，则取容器的innerHTML作为组件模板内容
     if (!isFunction(component) && !component.render && !component.template) {
       // __UNSAFE__
       // Reason: potential execution of JS expressions in in-DOM template.
