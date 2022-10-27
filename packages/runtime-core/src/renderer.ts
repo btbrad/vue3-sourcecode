@@ -379,9 +379,11 @@ function baseCreateRenderer(
     }
 
     // patching & not same type, unmount old tree
+    // 如果存在新旧节点且其类型不同, 则销毁旧节点
     if (n1 && !isSameVNodeType(n1, n2)) {
       anchor = getNextHostNode(n1)
       unmount(n1, parentComponent, parentSuspense, true)
+      // 将n1设置为null, 保证后续执行mount逻辑
       n1 = null
     }
 
@@ -1316,6 +1318,7 @@ function baseCreateRenderer(
     // 组件的渲染和更新函数
     const componentUpdateFn = () => {
       if (!instance.isMounted) {
+        // 渲染组件
         let vnodeHook: VNodeHook | null | undefined
         const { el, props } = initialVNode
         const { bm, m, parent } = instance
@@ -1471,7 +1474,9 @@ function baseCreateRenderer(
 
         // Disallow component effect recursion during pre-lifecycle hooks.
         toggleRecurse(instance, false)
+        // next表示新的组件vnode
         if (next) {
+          // 更新组件vnode节点信息
           next.el = vnode.el
           updateComponentPreRender(instance, next, optimized)
         } else {
@@ -1498,16 +1503,20 @@ function baseCreateRenderer(
         if (__DEV__) {
           startMeasure(instance, `render`)
         }
+        // 渲染新的子树vnode
         const nextTree = renderComponentRoot(instance)
         if (__DEV__) {
           endMeasure(instance, `render`)
         }
+        // 缓存旧的子树vnode
         const prevTree = instance.subTree
+        // 更新子树vnode
         instance.subTree = nextTree
 
         if (__DEV__) {
           startMeasure(instance, `patch`)
         }
+        // 组件更新核心逻辑, 根据新旧子树vnode执行patch
         patch(
           prevTree,
           nextTree,
@@ -2342,6 +2351,7 @@ function baseCreateRenderer(
         unmount(container._vnode, null, null, true)
       }
     } else {
+      // 创建或者更新组建
       patch(container._vnode || null, vnode, container, null, null, null, isSVG)
     }
     flushPreFlushCbs()
